@@ -22,7 +22,11 @@ class UserResource extends JsonResource
         'email' => $this->email,
         'wallet_details' => $this->whenLoaded('wallet', function() {
             return new WalletResource($this->wallet);
-        }, 'No Active Wallet')
-        ];
+        }),
+        'transaction_details' => $this->whenLoaded('transactions', function() {
+            return new TransactionResource($this->transactions);
+        }),
+    ];
+
     }
 }

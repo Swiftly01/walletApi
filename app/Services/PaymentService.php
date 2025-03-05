@@ -66,17 +66,17 @@ public  function get_actual_charges($amount_to_be_paid)
 
 public function storeInitTransactions($user, $amount, $txref, $inv )
 {
+
     try {
-       
+      
+      $userInvoice = UserService::getUserInvoice($user);
+
       Transaction::create([
         'user_id' => $user->id,
         'amount'  => $amount,
         'status' => PaymentStatus::PENDING,
-         'transaction_reference' => $txref,
-         'invoice' => $inv,
-         
-
-
+        'transaction_reference' => $txref,
+        'invoice' => $userInvoice ? $userInvoice->invoice : $inv,          
       ]);
 
 
@@ -161,6 +161,39 @@ public function verifyTransaction(string $trx_ref)
   return $response;
 
 }
+
+
+public function handleAirtimePayment($wallet, $amount,  bool $response = false):bool
+ {
+      //Success payment simulated
+
+      try{
+          
+
+        if($response) {
+
+          return true;
+
+        }
+
+
+        return false;
+
+         
+
+      } catch(Exception $e) {
+
+        Log::error('Airtime purchase error' . $e->getMessage());
+
+
+        return false;
+
+      }
+
+
+
+ }
+
 
 
 

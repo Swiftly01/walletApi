@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use App\Http\Resources\WalletResource;
 use App\Models\User;
+use App\Services\UserService;
 use Illuminate\Http\Request;
 
 class WalletController extends Controller
@@ -14,7 +15,7 @@ class WalletController extends Controller
   public function checkWalletBalance(Request $request)
   { 
     
-    $user = User::with('wallet')->find($request->user()->id);
+    $user = UserService::getUserWalletBalance($request->user());
 
     if(!$user->wallet) {
 

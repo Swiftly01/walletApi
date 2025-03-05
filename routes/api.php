@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\Auth\UserAuthController;
 use App\Http\Controllers\Api\V1\WalletController;
 use App\Http\Controllers\Api\V1\PaymentController;
+use App\Http\Controllers\Api\V1\AirtimeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -18,12 +19,13 @@ use Illuminate\Support\Facades\Route;
 */
 Route::post('/login', [UserAuthController::class, 'loginUser']);
 
-Route::get('paystack/callback', [PaymentController::class, 'checkTransactionRef'])->name('verify.txn');
+Route::get('/paystack/callback', [PaymentController::class, 'checkTransactionRef'])->name('verify.txn');
 
 
 Route::middleware('auth:sanctum')->prefix('v1')->group(function() {
 
-    Route::get('wallet/balance', [WalletController::class, 'checkWalletBalance']);
-    Route::post('wallet/fund', [PaymentController::class, 'handlePayment']);
+    Route::get('/wallet/balance', [WalletController::class, 'checkWalletBalance']);
+    Route::post('/wallet/fund', [PaymentController::class, 'handlePayment']);
+    Route::post('/purchase/airtime', [AirtimeController::class, 'purchaseAirtime']);
 
 });

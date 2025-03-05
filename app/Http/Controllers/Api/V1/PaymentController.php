@@ -114,8 +114,8 @@ class PaymentController extends Controller
 
       } else {
 
-        Log::error($response['message']);
-        Log::error($response);
+       // Log::error($response['message']);
+      //  Log::error($response);
 
         return $this->errorResponse(
           status: false,
@@ -142,17 +142,6 @@ class PaymentController extends Controller
 
       
     }
-
-
-
-
-
-
-
-
-
-
-
 
   }
 
@@ -185,118 +174,111 @@ class PaymentController extends Controller
   }
 
   public function handlePaymentResponse($response, $trx_ref)
-{
+ {
 
-  if($response['status']) {
+      if($response['status']) {
+      //  $response = $res['data'];
+      
+        if(array_key_exists('data', $response) && is_array($response)) {
 
-  //  $response = $res['data'];
-  
-    if(array_key_exists('data', $response) && is_array($response)) {
-
-    //  log::info($response = $res['data']);
-
-
-      if($response['data']['status'] != 'success') {
-
-        return $this->errorResponse(
-          status: false,
-          message: 'Transaction is still pending,if you have been debited , kindly contact support for more Info',
-          statusCode: 400,
-         
-          );
-  
-
-      }
+        //  log::info($response = $res['data']);
 
 
-      try {
+          if($response['data']['status'] != 'success') {
 
-         DB::beginTransaction();
+            return $this->errorResponse(
+              status: false,
+              message: 'Transaction is still pending,if you have been debited , kindly contact support for more Info',
+              statusCode: 400,
+            
+              );
+      
 
-
-         $transaction = Transaction::with('user')->where('transaction_reference', $trx_ref)->first();
-
-         $user = $transaction->user;
-
-
-         $transaction->update([
-          'status' => ($response['data']['status'] == 'success') ? PaymentStatus::PAID : PaymentStatus::FAILED,
-          'amount'=> $transaction->amount,
-          'gateway_response' => $response['data']['gateway_response'],
-          'payment_reference' => (!empty(($response['data']['authorization'])))?$response['data']['authorization']['authorization_code']:'',
-          'transaction_date' => date("Y-m-d H:i:s", strtotime($response['data']['paid_at'])),
-          'gateway' => 'paystack',
-          'gateway_response' =>  $response['data']['gateway_response'],
-          'signature' => (!empty(($response['data']['authorization'])))?$response['data']['authorization']['signature']:'',
-          'description' => 'Wallet funding through paystack',
-          'purpose' => 'Funding of wallet',
-         ]);
-
-         $wallet = [];
-         $wallet['user_id'] = $user->id;
-         $wallet['balance'] = $response['data']['amount'] / 100;
-
-         Wallet::create($wallet);
-
-         $user->notify(new PaymentSuccessNotification(
-           name: $user->name,
-           amount:  $transaction->amount,
-           invoice: $transaction->invoice,
-         ));
-
-         DB::commit();
-
-         return $this->successResponse(
-          status: true,
-          message: 'Transaction Completed successfully',
-          data: [
-            'data' => $response,
-          ],
-
-        );
-
-   
+          }
 
 
-      }catch(Exception $e) {
+          try {
+
+            DB::beginTransaction();
 
 
-        Log::error($e->getMessage());
-        DB::rollback();
+            $transaction = Transaction::with('user')->where('transaction_reference', $trx_ref)->first();
+
+            $user = $transaction->user;
+
+
+            $transaction->update([
+              'status' => ($response['data']['status'] == 'success') ? PaymentStatus::PAID : PaymentStatus::FAILED,
+              'amount'=> $transaction->amount,
+              'gateway_response' => $response['data']['gateway_response'],
+              'payment_reference' => (!empty(($response['data']['authorization'])))?$response['data']['authorization']['authorization_code']:'',
+              'transaction_date' => date("Y-m-d H:i:s", strtotime($response['data']['paid_at'])),
+              'gateway' => 'paystack',
+              'gateway_response' =>  $response['data']['gateway_response'],
+              'signature' => (!empty(($response['data']['authorization'])))?$response['data']['authorization']['signature']:'',
+              'description' => 'Wallet funding through paystack',
+              'purpose' => 'Funding of wallet',
+            ]);
+
+            $wallet = [];
+            $wallet['user_id'] = $user->id;
+            $wallet['balance'] = $response['data']['amount'] / 100;
+
+            Wallet::create($wallet);
+
+            $user->notify(new PaymentSuccessNotification(
+              name: $user->name,
+              amount:  $transaction->amount,
+              invoice: $transaction->invoice,
+              title: 'payment'
+            ));
+
+            DB::commit();
+
+            return $this->successResponse(
+              status: true,
+              message: 'Transaction Completed successfully',
+              data: [
+                'data' => $response,
+              ],
+
+            );
+
+      
+
+
+          }catch(Exception $e) {
+
+
+            Log::error($e->getMessage());
+            DB::rollback();
+
+            return $this->errorResponse(
+              status: false,
+              message: 'OHHHH!!!!  ::: Something went wrong  during payment processing, pls try again later or report the issue to the customer support!',
+              statusCode: 400,
+            
+              );
+
+
+          }
+
+        }  
 
         return $this->errorResponse(
           status: false,
           message: 'OHHHH!!!!  ::: Something went wrong  during payment processing, pls try again later or report the issue to the customer support!',
           statusCode: 400,
-         
+        
           );
+
 
 
       }
 
-    }  
-
-    return $this->errorResponse(
-      status: false,
-      message: 'OHHHH!!!!  ::: Something went wrong  during payment processing, pls try again later or report the issue to the customer support!',
-      statusCode: 400,
-     
-      );
+ }
 
 
-
-  }
-
-
-
-
-
-
-
-
-
-
-}
-
+ 
 
 }

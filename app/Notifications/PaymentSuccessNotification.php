@@ -14,17 +14,21 @@ class PaymentSuccessNotification extends Notification
     private $name;
     private $amount;
     private $invoice;
+    private $title;
+    private $purpose;
     
 
 
     /**
      * Create a new notification instance.
      */
-    public function __construct($name, $amount, $invoice, )
+    public function __construct($name, $amount, $invoice, $title = '', $purpose = '' )
     {
         $this->name = $name;
         $this->amount = $amount;
         $this->invoice = $invoice;
+        $this->title = $title;
+        $this->purpose = $purpose;
     
     }
 
@@ -45,7 +49,9 @@ class PaymentSuccessNotification extends Notification
     {
         return (new MailMessage)
                     ->greeting('Dear ' .$this->name . ', ')
-                    ->line('Your payment of ' . '#'. Number_format($this->amount) .' is successful')
+                    ->line('Your '. $this->title .' of ' . '#'. Number_format($this->amount) .' '. $this->purpose . ' is successful')
+                    ->line('Invoice number: ' . $this->invoice)
+                    ->line('Kindly use your invoice number to view all your transactions')
                     ->action('Check Wallet', url('/'))
                     ->line('Thank you for using our application!');
     }
