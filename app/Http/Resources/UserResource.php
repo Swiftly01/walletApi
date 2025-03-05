@@ -23,9 +23,7 @@ class UserResource extends JsonResource
         'wallet_details' => $this->whenLoaded('wallet', function() {
             return new WalletResource($this->wallet);
         }),
-        'transaction_details' => $this->whenLoaded('transactions', function() {
-            return new TransactionResource($this->transactions);
-        }),
+       
     ];
 
     }

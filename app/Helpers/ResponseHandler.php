@@ -3,14 +3,14 @@
 namespace App\Helpers;
 
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Resources\Json\ResourceCollection;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Response;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class ResponseHandler 
 {
-    public static function sendResponse(bool $status, string $message = '', array|ResourceCollection|JsonResource $data = [], array $errors = [], array $meta = [], int $statusCode, array $headers = []) :JsonResponse 
+    public static function sendResponse(bool $status, string $message = '', array|AnonymousResourceCollection|JsonResource $data = [], array $errors = [], array $meta = [], int $statusCode, array $headers = []) :JsonResponse 
     {
           $response = [
             'status' => $status,
@@ -24,7 +24,7 @@ class ResponseHandler
 
           $response['data'] = $data['data'] ?? $data;
 
-          if($data instanceof  ResourceCollection && $data->resource instanceof LengthAwarePaginator ) {
+          if($data instanceof  AnonymousResourceCollection && $data->resource instanceof LengthAwarePaginator ) {
             $meta = array_merge($meta, self::getPaginationMeta($data->resource));
           }
 
@@ -70,7 +70,7 @@ class ResponseHandler
     }
 
 
-    public static function successResponse(bool $status, string $message='', array|ResourceCollection|JsonResource $data = [], array $meta = [], array $errors = [], int $statusCode = 200, array $headers = []): JsonResponse
+    public static function successResponse(bool $status, string $message='', array|AnonymousResourceCollection|JsonResource $data = [], array $meta = [], array $errors = [], int $statusCode = 200, array $headers = []): JsonResponse
     {
 
       return static::sendResponse(

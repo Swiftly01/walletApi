@@ -7,7 +7,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Http\Resources\Json\ResourceCollection;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller as BaseController;
 
@@ -15,7 +15,7 @@ abstract class Controller extends BaseController
 {
     use AuthorizesRequests, ValidatesRequests;
 
-    public function successResponse(bool $status, string $message='', array|ResourceCollection|JsonResource $data = [], array $meta = [], array $errors = [], int $statusCode = 200, array $headers = []):JsonResponse
+    public function successResponse(bool $status, string $message='', array|AnonymousResourceCollection|JsonResource $data = [], array $meta = [], array $errors = [], int $statusCode = 200, array $headers = []):JsonResponse
     {
 
         return ResponseHandler::successResponse(
@@ -43,7 +43,7 @@ abstract class Controller extends BaseController
     }
 
 
-    public function paginatedResponse(string $message = '', ResourceCollection $data, array $meta = [], int $statusCode = Response::HTTP_OK, array $headers = [])
+    public function paginatedResponse(string $message = '', AnonymousResourceCollection $data, array $meta = [], int $statusCode = Response::HTTP_OK, array $headers = [])
     {
         return ResponseHandler::sendResponse(
             status: true,
