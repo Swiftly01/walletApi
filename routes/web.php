@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\PaymentController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -12,6 +13,10 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+
+Route::get('paystack/callback', [PaymentController::class, 'checkTransactionRef'])->name('verify.txn');
+
+
 
 Route::get('/', function () {
     return view('welcome');

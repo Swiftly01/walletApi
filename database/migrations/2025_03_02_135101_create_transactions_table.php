@@ -18,8 +18,12 @@ return new class extends Migration
             $table->integer('status')->default(0); 
             $table->string('transaction_reference');
             $table->string('invoice');
-            $table->string('description');
-            $table->string('purpose');
+            $table->string('description')->nullable();
+            $table->string('purpose')->nullable();
+            $table->string('gateway')->nullable();
+            $table->string('gateway_response')->nullable();
+            $table->string('payment_reference')->nullable();
+            $table->string('signature')->nullable();
             $table->dateTime('transaction_date')->nullable();
             $table->timestamps();
         });

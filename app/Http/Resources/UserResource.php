@@ -20,6 +20,9 @@ class UserResource extends JsonResource
         'id' => $this->id,
         'name' => $this->name,
         'email' => $this->email,
-       ];
+        'wallet_details' => $this->whenLoaded('wallet', function() {
+            return new WalletResource($this->wallet);
+        }, 'No Active Wallet')
+        ];
     }
 }
