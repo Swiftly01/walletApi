@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Transaction;
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
 
 class UserService 
 {
@@ -16,7 +17,10 @@ class UserService
 
     public static function getUserWalletBalance($user)
     {
-      return  User::with('wallet')->where('user_id', $user->id)->first();
+
+      return  User::with('wallet')->where('id', $user->id)->first();
+
+    
     }
 
 

@@ -17,19 +17,19 @@ class WalletController extends Controller
     
     $user = UserService::getUserWalletBalance($request->user());
 
-    if(!$user->wallet) {
+    if(!$user || !$user->wallet) {
 
-      return $this->successResponse(
-        status: true,
+      return $this->errorResponse(
+        status: false,
         message: "Sorry, You don't have an active wallet, kindly fund your account to activate your wallet",
-        statusCode:200,
+        statusCode:404,
       );
 
     }
 
     return $this->successResponse(
       status: true,
-      message: 'User Details and wallet balance fetched Successfully',
+      message: 'user details and wallet balance fetched successfully',
       statusCode:200,
       data: [
         'data' => new UserResource($user),
