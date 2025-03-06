@@ -29,3 +29,4 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function() {
     Route::get('/transactions', [TransactionController::class, 'getTransactions']);
 
 });
+
