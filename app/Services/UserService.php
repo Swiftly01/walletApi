@@ -17,8 +17,9 @@ class UserService
 
     public static function getUserWalletBalance($user)
     {
-
-      return  User::with('wallet')->where('id', $user->id)->first();
+      
+      
+      return  User::with('wallet')->find($user->id);
 
     
     }

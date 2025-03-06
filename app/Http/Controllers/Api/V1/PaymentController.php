@@ -30,7 +30,6 @@ class PaymentController extends Controller
 
 
   public function handlePayment(Request $request) 
-  
   {
       $validator = Validator::make($request->all(), [
         'amount' => ['required', 'numeric','min:1'],
@@ -77,61 +76,12 @@ class PaymentController extends Controller
         init_url: $init_url,
       );
 
-      if($response['status']) {
+      return  $this->paymentService->handleInitPaystackResponse($response);
 
-          if(!$response['status']) {
-
-            Log::error($response['message']);
-
-            return $this->errorResponse(
-              status: false,
-              message: 'OHHHH!!!!  ::: Something went wrong  during payment processing, pls try again later or report the issue to the customer support!',
-              statusCode: 400,
-              errors: [
-                'errors' => $response['message'],
-              ]
-            );
-
-
-
-
-          }
-
-          if(isset($response['data']['authorization_url'])){
-
-        //  return  Redirect::to($response['data']['authorization_url'])->send();
-
-          return $this->successResponse(
-            status: true,
-            message: 'Transaction initialized successfully.Copy the authorization url and open it in a browser.',
-            data: [
-              'data' => $response,
-            ],
-
-          );
-          }
-
-
-      } else {
-
-       // Log::error($response['message']);
-      //  Log::error($response);
-
-        return $this->errorResponse(
-          status: false,
-          message: 'OHHHH!!!!  ::: Something went wrong  during payment processing, pls try again later or report the issue to the customer support!',
-          statusCode: 400,
-          errors: [
-            'errors' => $response['message'],
-          ]
-          );
-
-
-     }
-
+  
     }catch(Exception $e) {
 
-      Log::error($e->getMessage());
+      Log::error('paystack processing error: ' . $e->getMessage());
 
       return $this->errorResponse(
         status: false,
@@ -156,7 +106,7 @@ class PaymentController extends Controller
                 
         $response = $this->paymentService->verifyTransaction($transactionRef);
 
-        return $this->handlePaymentResponse($response, $transactionRef);
+        return $this->paymentService->handlePaystackPaymentResponse($response, $transactionRef);
 
     }else {
 
@@ -173,112 +123,7 @@ class PaymentController extends Controller
 
   }
 
-  public function handlePaymentResponse($response, $trx_ref)
- {
-
-      if($response['status']) {
-      //  $response = $res['data'];
-      
-        if(array_key_exists('data', $response) && is_array($response)) {
-
-        //  log::info($response = $res['data']);
-
-
-          if($response['data']['status'] != 'success') {
-
-            return $this->errorResponse(
-              status: false,
-              message: 'Transaction is still pending,if you have been debited , kindly contact support for more Info',
-              statusCode: 400,
-            
-              );
-      
-
-          }
-
-
-          try {
-
-            DB::beginTransaction();
-
-
-            $transaction = Transaction::with('user')->where('transaction_reference', $trx_ref)->first();
-
-            $user = $transaction->user;
-
-
-            $transaction->update([
-              'status' => ($response['data']['status'] == 'success') ? PaymentStatus::PAID : PaymentStatus::FAILED,
-              'amount'=> $transaction->amount,
-              'gateway_response' => $response['data']['gateway_response'],
-              'payment_reference' => (!empty(($response['data']['authorization'])))?$response['data']['authorization']['authorization_code']:'',
-              'transaction_date' => date("Y-m-d H:i:s", strtotime($response['data']['paid_at'])),
-              'gateway' => 'paystack',
-              'gateway_response' =>  $response['data']['gateway_response'],
-              'signature' => (!empty(($response['data']['authorization'])))?$response['data']['authorization']['signature']:'',
-              'description' => 'Wallet funding through paystack',
-              'purpose' => 'Funding of wallet',
-            ]);
-
-            $wallet = [];
-            $wallet['user_id'] = $user->id;
-            $wallet['balance'] = $response['data']['amount'] / 100;
-
-            Wallet::create($wallet);
-
-            $user->notify(new PaymentSuccessNotification(
-              name: $user->name,
-              amount:  $transaction->amount,
-              invoice: $transaction->invoice,
-              title: 'payment'
-            ));
-
-            DB::commit();
-
-            return $this->successResponse(
-              status: true,
-              message: 'Transaction Completed successfully',
-              data: [
-                'data' => $response,
-              ],
-
-            );
-
-      
-
-
-          }catch(Exception $e) {
-
-
-            Log::error($e->getMessage());
-            DB::rollback();
-
-            return $this->errorResponse(
-              status: false,
-              message: 'OHHHH!!!!  ::: Something went wrong  during payment processing, pls try again later or report the issue to the customer support!',
-              statusCode: 400,
-            
-              );
-
-
-          }
-
-        }  
-
-        return $this->errorResponse(
-          status: false,
-          message: 'OHHHH!!!!  ::: Something went wrong  during payment processing, pls try again later or report the issue to the customer support!',
-          statusCode: 400,
-        
-          );
-
-
-
-      }
-
- }
-
-
+  
  
 
 }

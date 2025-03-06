@@ -7,6 +7,7 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Response;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Log;
 
 class ResponseHandler 
 {
@@ -38,6 +39,8 @@ class ResponseHandler
 
          
          $statusCode ??= $status ? Response::HTTP_OK : Response::HTTP_BAD_REQUEST;
+
+      
 
          return response()->json(
           data: $response,
@@ -72,6 +75,7 @@ class ResponseHandler
 
     public static function successResponse(bool $status, string $message='', array|AnonymousResourceCollection|JsonResource $data = [], array $meta = [], array $errors = [], int $statusCode = 200, array $headers = []): JsonResponse
     {
+
 
       return static::sendResponse(
         status: $status,
